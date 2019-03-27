@@ -1,0 +1,17 @@
+# OSX
+#
+.DS_Store
+.idea
+
+# node.js
+#
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Application configs
+.env*
+!.env.example
+
+
+/temp
