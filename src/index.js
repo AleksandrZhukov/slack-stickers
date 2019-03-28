@@ -23,6 +23,7 @@ app.use(bodyParser.json({ verify: rawBodyBuffer }));
 app.use('/slack', slackApi);
 
 app.use(express.static('temp'));
+app.use(express.static('public'));
 
 const server = app.listen(process.env.PORT || 3003, () => {
   console.log(
