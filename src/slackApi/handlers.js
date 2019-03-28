@@ -4,6 +4,8 @@ const db = require('../db');
 const config = require('dotenv').config().parsed;
 const md5 = require('md5');
 const _ = require('lodash');
+const qs = require('qs');
+const axios = require('axios');
 const URL = config.URL;
 
 const readdirAsync = util.promisify(fs.readdir);
@@ -160,7 +162,33 @@ const handleBtn = async function(req, res, next) {
   }
 };
 
+const auth = async function(req, res) {
+  if (!req.query.code) {
+    return res.redirect('/?error=access_denied');
+  }
+
+  const authInfo = {
+    client_id: config.SLACK_CLIENT_ID,
+    client_secret: config.SLACK_CLIENT_SECRET,
+    code: req.query.code,
+    single_channel: false
+  };
+
+  const result = await axios.post('https://slack.com/api/oauth.access', qs.stringify(authInfo))
+    .catch((err) => { console.error(err); });
+
+  const { team_id, error } = result.data;
+
+  if (error) {
+    res.sendStatus(401);
+    console.log(error);
+    return;
+  }
+  res.redirect(`slack://open?team=${team_id}`);
+};
+
 module.exports = {
   getStickers,
-  handleBtn
+  handleBtn,
+  auth
 };

@@ -3,6 +3,7 @@ const handlers = require('./handlers');
 
 const SlackApi = Router();
 
+SlackApi.get('/auth', handlers.auth);
 SlackApi.post('/', handlers.getStickers);
 SlackApi.post('/btn', handlers.handleBtn);
 

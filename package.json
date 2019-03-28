@@ -20,6 +20,7 @@
     "md5": "^2.2.1",
     "node-telegram-bot-api": "^0.30.0",
     "nodemon": "^1.18.10",
+    "qs": "^6.7.0",
     "sharp": "^0.21.3",
     "webp-converter": "^2.2.2"
   },
