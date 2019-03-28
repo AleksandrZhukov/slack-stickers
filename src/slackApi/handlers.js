@@ -2,27 +2,24 @@ const fs = require('fs');
 const util = require('util');
 const db = require('../db');
 const config = require('dotenv').config().parsed;
+const md5 = require('md5');
 const URL = config.URL;
 
 const readdirAsync = util.promisify(fs.readdir);
 
 const randomKey = 'XPFG';
+const stickersPerPage = 2;
 
 const getAttachments = async (userId, page = 0) => {
-  const token = db.get(`tokens.${userId}`).value();
+  const token = db.get(`tokens.${md5(userId)}`).value();
 
-  const userImages = db
-    .get(`userImages.${token}`)
-    .chunk(2)
-    .nth(page)
-    .value();
+  const userImages = db.get(`userImages.${token}`).value();
+  const pageImages = userImages.slice(stickersPerPage * page, stickersPerPage * (page + 1));
 
   const files = await readdirAsync('temp/images');
 
   const attachments = files
-    .filter(
-      f => f.includes('.png') && userImages.includes(f.replace('.png', ''))
-    )
+    .filter(f => f.includes('.png') && pageImages.includes(f.replace('.png', '')))
     .map(f => ({
       title: 'Sticker',
       image_url: `${URL}images/${f}`,
@@ -38,25 +35,32 @@ const getAttachments = async (userId, page = 0) => {
     }))
     .reverse();
 
+  const navigationBtns = [
+    page > 0 && {
+      name: 'send_sticker',
+      text: 'Prev',
+      type: 'button',
+      value: `nextPage_${page - 1}`
+    },
+    userImages.length - ((page + 1) * stickersPerPage) > 0 && {
+      name: 'send_sticker',
+      text: 'Next',
+      type: 'button',
+      value: `nextPage_${page + 1}`
+    },
+    {
+      name: 'send_sticker',
+      text: 'Cancel',
+      type: 'button',
+      style: 'danger',
+      value: 'cancel'
+    }
+  ];
+
   attachments.push({
     callback_id: 'send_sticker',
     title: '',
-    actions: [
-      {
-        name: 'send_sticker',
-        text: 'Next',
-        type: 'button',
-        style: 'good',
-        value: `nextPage_${page + 1}`
-      },
-      {
-        name: 'send_sticker',
-        text: 'Cancel',
-        type: 'button',
-        style: 'danger',
-        value: 'cancel'
-      }
-    ]
+    actions: navigationBtns.filter(Boolean)
   });
 
   return attachments;
@@ -67,7 +71,7 @@ const getStickers = async function(req, res, next) {
 
   if (~req.body.text.search(randomKey)) {
     const token = req.body.text.replace(/(^XPFG|\s)/g, '');
-    db.update('tokens', tokens => ({ ...tokens, [userId]: token })).write();
+    db.update('tokens', tokens => ({ ...tokens, [md5(userId)]: token })).write();
     return res.json({
       response_type: 'ephemeral', // private message
       text: 'You are registered, now you can send stickers'
