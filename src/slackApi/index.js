@@ -1,10 +1,12 @@
 const Router = require('express').Router;
-const handlers = require('./handlers');
+const auth = require('./auth');
+const getStickers = require('./getStickers');
+const handleBtns = require('./btns');
 
 const SlackApi = Router();
 
-SlackApi.get('/auth', handlers.auth);
-SlackApi.post('/', handlers.getStickers);
-SlackApi.post('/btn', handlers.handleBtn);
+SlackApi.get('/auth', auth);
+SlackApi.post('/', getStickers);
+SlackApi.post('/btn', handleBtns);
 
 module.exports = SlackApi;
