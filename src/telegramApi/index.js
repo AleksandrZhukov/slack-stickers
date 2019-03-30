@@ -36,7 +36,7 @@ const saveSticker = async msg => {
 
 bot.on('message', async msg => {
   if (msg.text === '/start') {
-    return bot.sendMessage(msg.chat.id, `Pls send this to slack: \n \`/ts XPFG${md5(msg.from.id)}\``, { parse_mode: 'markdown' });
+    return bot.sendMessage(msg.chat.id, `Pls send this to slack: \n \`/ss XPFG${md5(msg.from.id)}\``, { parse_mode: 'markdown' });
   }
   if (msg && msg.sticker && msg.sticker.file_id) {
     await saveSticker(msg);
