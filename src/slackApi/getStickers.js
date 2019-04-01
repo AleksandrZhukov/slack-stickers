@@ -27,7 +27,7 @@ const getStickers = async function(req, res) {
   }
 
   const token = db.get(`tokens.${md5(userId)}`).value();
-  const hasImages = db.has(`userImages.${token}`).size().value() > 0;
+  const hasImages = db.get(`userImages.${token}`).size().value() > 0;
 
   if (!hasImages) {
     return res.json({
