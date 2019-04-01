@@ -4,6 +4,11 @@ const axios = require('axios');
 const sharp = require('sharp');
 const md5 = require('md5');
 const uniq = require('lodash/uniq');
+const fs = require('fs');
+
+if (!fs.existsSync('temp/images')) {
+  fs.mkdirSync('temp/images');
+}
 
 const token = config.TELEGRAM_BOT_TOKEN;
 const db = require('../db');
