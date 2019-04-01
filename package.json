@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "deploy": "pm2 deploy deploy.json dev update"
   },
   "author": "",
   "license": "MIT",
@@ -25,6 +26,7 @@
     "webp-converter": "^2.2.2"
   },
   "devDependencies": {
+    "pm2": "^3.4.1",
     "prettier": "1.16.4"
   },
   "nodemonConfig": {
