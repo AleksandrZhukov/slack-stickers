@@ -5,6 +5,8 @@ const sharp = require('sharp');
 const md5 = require('md5');
 const uniq = require('lodash/uniq');
 const fs = require('fs');
+const https = require('https');
+const { convertFile } = require('tgs-to-gif');
 
 if (!fs.existsSync('temp/images')) {
   fs.mkdirSync('temp/images');
@@ -27,20 +29,43 @@ const getSticker = async fileId => {
   }`;
 };
 
+const saveStickerFile = async (userId, uniqFileId, msg) => {
+  const fileId = msg.sticker.file_id;
+  const image = await getSticker(fileId);
+
+  if (msg.sticker.is_animated) {
+    const mes = await sendMessage(msg.chat.id, 'Start generating Gif...');
+
+    const animatedFile = fs.createWriteStream(`temp/images/${fileId}.tgs`);
+    await new Promise((resolve, reject) => https.get(image, function(response) {
+      response.pipe(animatedFile).on('finish', (err) => {
+        err ? reject(err) : resolve();
+      });
+    }));
+
+    await convertFile(animatedFile.path, { output: `temp/images/${uniqFileId}.gif`, width: 150 });
+    bot.editMessageText('Gif generated', { chat_id: msg.chat.id, message_id: mes.message_id });
+
+  } else {
+    const res = await axios(image, { responseType: 'arraybuffer' });
+    await new Promise((resolve, reject) => sharp(res.data).resize({ width: 150 }).toFile(`temp/images/${uniqFileId}.png`, (err) => {
+      if (err) reject(err);
+      resolve();
+    }));
+  }
+};
+
 const saveSticker = async msg => {
   const userId = msg.from.id;
-  const fileId = msg.sticker.file_id;
+  const uniqFileId = msg.sticker.file_unique_id;
 
   try {
-    const image = await getSticker(fileId);
-    const res = await axios(image, { responseType: 'arraybuffer' });
-    sharp(res.data).resize({ width: 150 }).toFile(`temp/images/${fileId}.png`, (err) => {
-      if (!err) {
-        db.get('userImages').updateWith(md5(userId), (a = []) => uniq([fileId, ...a])).write();
-      } else {
-        throw err;
-      }
-    });
+    const files = await fs.promises.readdir('temp/images/');
+    if (!Array.from(files).some(f => f.startsWith(uniqFileId))) {
+      await saveStickerFile(userId, uniqFileId, msg);
+    }
+
+    db.get('userImages').updateWith(md5(userId), (a = []) => uniq([uniqFileId, ...a])).write();
   } catch (err) {
     sendMessage(msg.chat.id, 'Sorry, something went wrong. \nPlease report this issue to @alexZhukov.');
     console.error(err);
