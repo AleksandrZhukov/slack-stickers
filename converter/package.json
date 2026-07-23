@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.0",
+    "@hono/node-server": "^2.0.10",
     "hono": "^4.6.0",
     "sharp": "^0.33.5",
     "puppeteer": "^23.0.0",
