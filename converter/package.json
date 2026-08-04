@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@hono/node-server": "^1.13.0",
-    "hono": "^4.6.0",
+    "hono": "^4.13.0",
     "sharp": "^0.33.5",
     "puppeteer": "^23.0.0",
     "gifenc": "^1.0.3",
