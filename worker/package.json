@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "hono": "^4.6.0"
+    "hono": "^4.13.5"
   },
   "devDependencies": {
     "@cloudflare/vitest-pool-workers": "^0.8.71",
